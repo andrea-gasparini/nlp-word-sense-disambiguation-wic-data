@@ -67,7 +67,7 @@ pip install -r requirements.txt
 ```
 conda activate nlp2021-hw3
 bash test.sh data/dev.jsonl
-```
+``` 
 
 Actually, you can replace *data/dev.jsonl* to point to a different file, as far as the target file has the same format.
 
