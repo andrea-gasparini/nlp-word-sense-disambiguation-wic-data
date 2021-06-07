@@ -16,16 +16,9 @@ def build_model(device: str) -> Model:
 
 class RandomBaseline(Model):
 
-    options = [
-        ('True', 40000),
-        ('False', 40000),
-    ]
-
     def __init__(self):
-
-        self._options = [option[0] for option in self.options]
-        self._weights = np.array([option[1] for option in self.options])
-        self._weights = self._weights / self._weights.sum()
+        # Load your models/tokenizer/etc that only needs to be loaded once when doing inference
+        pass
 
     def predict(self, sentence_pairs: List[Dict]) -> Tuple[List[str], List[str]]:
         preds_wsd = [(np.random.choice(wn.synsets(pair["lemma"], mapping[pair["pos"]])).lemmas()[0].key(), np.random.choice(wn.synsets(pair["lemma"], mapping[pair["pos"]])).lemmas()[0].key()) for pair in sentence_pairs]
@@ -42,6 +35,10 @@ class StudentModel(Model):
     
     # STUDENT: construct here your model
     # this class should be loading your weights and vocabulary
+    
+    def __init__(self):
+        # Load your models/tokenizer/etc that only needs to be loaded once when doing inference
+        pass
 
     def predict(self, sentence_pairs: List[Dict]) -> List[str]:
         # STUDENT: implement here your predict function
