@@ -1,0 +1,11 @@
+.idea/
+
+wandb/
+lightning_logs/
+
+data/WSD_Evaluation_Framework/
+data/xl-wsd/
+data/preprocessed/
+
+model/bert-base-cased/
+model/*.ckpt
