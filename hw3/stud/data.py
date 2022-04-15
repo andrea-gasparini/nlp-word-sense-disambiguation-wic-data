@@ -1,6 +1,19 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import *
+
+from pytorch_lightning.utilities import AttributeDict
+
+
+@dataclass
+class HParams:
+    num_classes: int
+    input_size: int
+    hidden_size: int = 100
+    learning_rate: float = 1e-3
+
+    def as_dict(self) -> AttributeDict:
+        return AttributeDict(asdict(self))
 
 
 class Pos(Enum):

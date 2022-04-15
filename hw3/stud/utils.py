@@ -1,13 +1,32 @@
 import os
 from typing import *
 
+import nltk
 import torch
+from nltk.corpus import wordnet as wn
+from nltk.corpus.reader import Lemma
 from torch import Tensor
 from torch.nn.utils import rnn
 
 from stud.constants import PAD_INDEX
+from stud.data import Token
 
 T = TypeVar('T')
+
+
+def nltk_downloads(download_dir: Optional[str] = None) -> None:
+    """
+    Downloads NLTK's necessary resources
+    """
+    nltk.download('wordnet', download_dir=download_dir)
+
+
+def get_wn_possible_sense_ids(token: Token) -> List[str]:
+    """
+    Returns all possible sense ids matching lemma and part of speech tag (any if pos is None) of the given token
+    """
+    lemmas: List[Lemma] = wn.lemmas(token.lemma, token.wn_pos) if token.lemma else list()
+    return [lemma.key() for lemma in lemmas]
 
 
 def get_pretrained_model(pretrained_model_name_or_path: str) -> str:

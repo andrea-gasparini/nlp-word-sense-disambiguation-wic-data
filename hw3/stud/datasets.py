@@ -14,8 +14,8 @@ from stud.data import Token, Pos
 from stud.transformer_embedder import TransformerEmbedder
 from stud.utils import list_to_dict
 
-Sample = Dict[str, Tensor]
-Batch = Dict[str, Tensor]
+Sample = Dict[str, Union[Tensor, Token]]
+Batch = Dict[str, Union[Tensor, List[Token]]]
 
 
 class WSDDataset(Dataset):
@@ -29,6 +29,7 @@ class WSDDataset(Dataset):
         self.embedder = TransformerEmbedder(embedder, device=utils.get_device())
 
         self.__encode_samples()
+        self.to_device("cpu")
 
     @classmethod
     def from_path(cls, path: str, embedder: str, senses_vocab: Optional[Vocab] = None) -> "WSDDataset":
@@ -57,7 +58,7 @@ class WSDDataset(Dataset):
         elif isinstance(samples_or_path, List):
             return cls(samples_or_path, embedder, senses_vocab)
         else:
-            raise Exception("`samples_or_path` is neither a `List[List[WSDToken]]` nor a `str`")
+            raise Exception("`samples_or_path` is neither a `List[List[Token]]` nor a `str`")
 
     @property
     def input_size(self) -> int:
@@ -66,6 +67,10 @@ class WSDDataset(Dataset):
     @property
     def num_senses(self) -> int:
         return len(self.senses_vocab.get_itos())
+
+    def to_device(self, device: str) -> None:
+        for sample in self.encoded_samples:
+            sample["sense_embedding"] = sample["sense_embedding"].to(device)
 
     def __encode_samples(self) -> None:
 
