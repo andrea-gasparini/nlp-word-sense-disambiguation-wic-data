@@ -1,3 +1,4 @@
+import functools
 from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import *
@@ -49,3 +50,24 @@ class Token:
     @property
     def is_tagged(self) -> bool:
         return self.sense_id is not None and self.id is not None
+
+
+@dataclass
+class WiCSample:
+    sentence1: List[Token]
+    sentence2: List[Token]
+    label: bool
+    __sense1: Token = None
+    __sense2: Token = None
+
+    @property
+    def sense1(self) -> Token:
+        if self.__sense1 is None:
+            self.__sense1 = functools.reduce(lambda t1, t2: t1 if t1.id else t2, self.sentence1)
+        return self.__sense1
+
+    @property
+    def sense2(self) -> Token:
+        if self.__sense2 is None:
+            self.__sense2 = functools.reduce(lambda t1, t2: t1 if t1.id else t2, self.sentence2)
+        return self.__sense2

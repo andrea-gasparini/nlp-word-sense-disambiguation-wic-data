@@ -1,6 +1,5 @@
 import os.path
 from typing import *
-from xml.etree import ElementTree
 
 import torch
 from torch import Tensor
@@ -10,7 +9,9 @@ from tqdm import tqdm
 
 from stud import utils, constants as const
 from stud.constants import XML_DATA_SUFFIX, TXT_GOLD_KEYS_SUFFIX, UNK_TOKEN
-from stud.data import Token, Pos
+from stud.data import Token
+from stud.data_readers import read_wsd_corpus, read_wic_corpus
+from stud.sense_inventories import build_senses_vocab
 from stud.transformer_embedder import TransformerEmbedder
 from stud.utils import list_to_dict
 
@@ -110,50 +111,6 @@ class WSDDataset(Dataset):
         }
 
 
-def read_wsd_corpus(xml_data_path: str, txt_gold_keys_path: str) -> List[List[Token]]:
-
-    if not os.path.isfile(xml_data_path):
-        raise Exception(f"{xml_data_path} is not a valid xml data file")
-    if not os.path.isfile(txt_gold_keys_path):
-        raise Exception(f"{txt_gold_keys_path} is not a valid txt gold keys file")
-
-    sentences = list()
-
-    with open(txt_gold_keys_path) as f:
-        gold_keys = [line.strip().split(' ') for line in f]
-
-    sense_ids_dict = dict()
-    for gold_key in gold_keys:
-        token_id = gold_key[0]
-        sense_id = gold_key[1]  # ignore eventual secondary senses ([2:])
-        sense_ids_dict[token_id] = sense_id
-
-    # iterate over <sentence> tags from the given xml file
-    for i, sent_xml in enumerate(ElementTree.parse(xml_data_path).iter('sentence')):
-
-        sentence = list()
-        # for each inner xml token (either <instance> or <wf>)
-        for token_index, token_xml in enumerate(sent_xml):
-            # store the token's sense id if it is <instance>,
-            sense_id = (sense_ids_dict.get(token_xml.attrib.get('id'), None)
-                        if token_xml.tag == 'instance' else None)
-
-            token = Token(text=token_xml.text.lower(),
-                          index=token_index,
-                          lemma=token_xml.attrib.get('lemma'),
-                          pos=Pos.parse(token_xml.attrib.get('pos')),
-                          id=token_xml.attrib.get('id'),
-                          sense_id=sense_id)
-
-            sentence.append(token)
-
-        # check that at least one token in the sentence is correctly tagged with a sense id
-        if any([token.is_tagged for token in sentence]):
-            sentences.append(sentence)
-
-    return sentences
-
-
 def build_senses_vocab(samples: List[List[Token]]) -> Vocab:
     counter = Counter()
 
@@ -183,8 +140,12 @@ if __name__ == "__main__":
                                       f"{const.TRAIN_SET_PATH}{const.TXT_GOLD_KEYS_SUFFIX}")
     evaluation_corpus = read_wsd_corpus(f"{const.TEST_SET_PATH}{const.XML_DATA_SUFFIX}",
                                         f"{const.TEST_SET_PATH}{const.TXT_GOLD_KEYS_SUFFIX}")
+    wic_corpus = list()
+    for wic_sample in read_wic_corpus(const.WIC_TEST_SET_PATH, const.WIC_TEST_SET_WSD_KEYS_PATH):
+        wic_corpus.append(wic_sample.sentence1)
+        wic_corpus.append(wic_sample.sentence2)
 
-    senses_vocabulary = build_senses_vocab(training_corpus + evaluation_corpus)
+    senses_vocabulary = build_senses_vocab(training_corpus + evaluation_corpus + wic_corpus)
 
     embedder_model = utils.get_pretrained_model(const.TRANSFORMER_EMBEDDER_PATH)
 
