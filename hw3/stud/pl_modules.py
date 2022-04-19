@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from typing import *
 
 import pytorch_lightning as pl
@@ -8,7 +7,6 @@ from torch import nn
 from torchmetrics import Accuracy, F1Score
 from torchtext.vocab import Vocab
 
-from stud import utils
 from stud.constants import UNK_TOKEN
 from stud.datasets import Batch
 
@@ -84,11 +82,9 @@ class WordSenseDisambiguator(pl.LightningModule):
         predicted_ids: List[str] = list()
         predicted_indices: List[int] = list()
 
-        for token, preds in zip(batch["tokens"], step_output["preds"]):
+        for possible_sense_ids, preds in zip(batch["candidates"], step_output["preds"]):
 
-            # retrieve from WordNet the possible sense ids of the given token
-            possible_sense_ids = utils.get_wn_possible_sense_ids(token)
-            # and get only the indices of those senses also available in our vocabulary
+            # get only the indices of those senses also available in our vocabulary
             possible_sense_ids_in_vocab = [sense_id for sense_id in possible_sense_ids if sense_id in self.senses_vocab]
             possible_sense_indices = [self.senses_vocab[sense_id] for sense_id in possible_sense_ids_in_vocab]
 

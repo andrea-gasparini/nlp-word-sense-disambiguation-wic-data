@@ -7,6 +7,7 @@ from torchtext.vocab import Vocab
 
 from stud.data import Token
 from stud.datasets import WSDDataset
+from stud.sense_inventories import SenseInventory
 
 
 class WSDDataModule(pl.LightningDataModule):
@@ -15,6 +16,7 @@ class WSDDataModule(pl.LightningDataModule):
                  valid_samples_or_path: Union[List[List[Token]], str],
                  test_samples_or_path: Union[List[List[Token]], str],
                  embedder_model: str,
+                 sense_inventory: SenseInventory,
                  senses_vocab: Optional[Vocab] = None,
                  batch_size: int = 32,
                  num_workers: int = 0,
@@ -40,6 +42,7 @@ class WSDDataModule(pl.LightningDataModule):
         self.test_set: Optional[WSDDataset] = None
 
         self.embedder_model = embedder_model
+        self.sense_inventory = sense_inventory
         self.senses_vocab = senses_vocab
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -48,11 +51,20 @@ class WSDDataModule(pl.LightningDataModule):
     def setup(self, stage: Optional[str] = None) -> None:
 
         if stage == "fit" or stage is None:
-            self.train_set = WSDDataset.parse(self.train_samples_or_path, self.embedder_model, self.senses_vocab)
-            self.valid_set = WSDDataset.parse(self.valid_samples_or_path, self.embedder_model, self.senses_vocab)
+            self.train_set = WSDDataset.parse(self.train_samples_or_path,
+                                              self.embedder_model,
+                                              self.sense_inventory,
+                                              self.senses_vocab)
+            self.valid_set = WSDDataset.parse(self.valid_samples_or_path,
+                                              self.embedder_model,
+                                              self.sense_inventory,
+                                              self.senses_vocab)
 
         if stage == "test" or stage is None:
-            self.test_set = WSDDataset.parse(self.test_samples_or_path, self.embedder_model, self.senses_vocab)
+            self.test_set = WSDDataset.parse(self.test_samples_or_path,
+                                             self.embedder_model,
+                                             self.sense_inventory,
+                                             self.senses_vocab)
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return DataLoader(self.train_set,
