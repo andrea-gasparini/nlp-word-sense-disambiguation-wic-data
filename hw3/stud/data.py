@@ -24,7 +24,7 @@ class Pos(Enum):
     ADV = "r"
 
     @classmethod
-    def parse(cls, value) -> Optional["Pos"]:
+    def parse(cls, value: str) -> Optional["Pos"]:
         return cls[value] if value in cls._member_map_ else None
 
     def __str__(self) -> str:
@@ -43,6 +43,15 @@ class Token:
     lemma: Optional[str] = None
     pos: Optional[Pos] = None
 
+    @classmethod
+    def parse(cls, dictionary: Dict[str, Union[int, str]]) -> "Token":
+        return cls(text=dictionary["text"],
+                   index=dictionary["index"],
+                   id=dictionary["id"],
+                   sense_id=dictionary["sense_id"],
+                   lemma=dictionary["lemma"],
+                   pos=Pos.parse(dictionary["pos"]))
+
     @property
     def wn_pos(self) -> Optional[str]:
         return self.pos.to_wordnet() if isinstance(self.pos, Pos) else None
@@ -50,6 +59,16 @@ class Token:
     @property
     def is_tagged(self) -> bool:
         return self.sense_id is not None and self.id is not None
+
+    def as_dict(self) -> Dict[str, Union[int, str]]:
+        return {
+            "text": self.text,
+            "index": self.index,
+            "id": self.id,
+            "sense_id": self.sense_id,
+            "lemma": self.lemma,
+            "pos": str(self.pos)
+        }
 
 
 @dataclass
