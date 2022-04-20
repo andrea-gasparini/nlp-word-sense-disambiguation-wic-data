@@ -7,7 +7,13 @@ lightning_logs/
 
 data/WSD_Evaluation_Framework/
 data/xl-wsd/
-data/preprocessed/
+data/preprocessed/GlossBERT/*
+data/preprocessed/WSDisambiguator/*
 
 model/bert-base-cased/
 model/*.ckpt
+
+!.gitkeep
+
+!data/preprocessed/GlossBERT/semeval2007.json
+!data/preprocessed/GlossBERT/wic_dev.json
