@@ -24,15 +24,15 @@ class TransformerEmbedder(pl.LightningModule):
 
         self.embedding_dimension = self.model.config.hidden_size
 
-    def forward(self, tokens_batch: List[List[str]]) -> Tensor:
+    def forward(self, tokens_batch: List[List[str]], device: Optional[str] = None) -> Tensor:
         encoding = self.tokenizer(tokens_batch,
                                   padding=True,
                                   truncation=False,
                                   return_tensors="pt",
                                   is_split_into_words=True)
 
-        self.model.to(self.device)
-        input_ids = encoding["input_ids"].to(self.device)
+        self.model.to(self.device if device is None else device)
+        input_ids = encoding["input_ids"].to(self.device if device is None else device)
 
         # shape: (batch_size, num_sub-words, embedding_size)
         encoder_outputs = self.model(input_ids)

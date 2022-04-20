@@ -30,12 +30,11 @@ class WSDDataset(Dataset):
                  senses_vocab: Optional[Vocab] = None) -> None:
         super().__init__()
 
-        self.sense_inventory = sense_inventory
         self.senses_vocab = senses_vocab if senses_vocab is not None else build_senses_vocab(samples)
 
-        self.embedder = TransformerEmbedder(embedder, device=utils.get_device())
+        self.embedder = TransformerEmbedder(embedder)
 
-        self.__encode_samples(samples)
+        self.__encode_samples(samples, sense_inventory)
         self.to_device("cpu")
 
     @classmethod
@@ -81,7 +80,7 @@ class WSDDataset(Dataset):
         for sample in self.encoded_samples:
             sample["sense_embedding"] = sample["sense_embedding"].to(device)
 
-    def __encode_samples(self, samples: List[List[Token]]) -> None:
+    def __encode_samples(self, samples: List[List[Token]], sense_inventory: SenseInventory) -> None:
 
         self.encoded_samples: List[Sample] = list()
 
@@ -89,7 +88,7 @@ class WSDDataset(Dataset):
             sample = samples[sample_idx]
 
             # shape: (batch_size=1, sample_length, embedding_dimension)
-            embeddings: Tensor = self.embedder([[token.text for token in sample]])
+            embeddings: Tensor = self.embedder([[token.text for token in sample]], device=utils.get_device())
             # remove the empty batch size dimension
             embeddings: Tensor = embeddings.squeeze()
 
@@ -97,7 +96,7 @@ class WSDDataset(Dataset):
                 if token.is_tagged:
 
                     # retrieve the possible sense ids of the given token
-                    possible_sense_ids = self.sense_inventory.get_possible_sense_ids(token)
+                    possible_sense_ids = sense_inventory.get_possible_sense_ids(token)
 
                     self.encoded_samples.append({
                         "sense_embedding": embedding,
@@ -237,12 +236,13 @@ if __name__ == "__main__":
     embedder_model = utils.get_pretrained_model(const.TRANSFORMER_EMBEDDER_PATH)
 
     train_set = WSDDataset(training_corpus, embedder_model, sense_invent, senses_vocabulary)
-    valid_set = WSDDataset(semeval07_corpus, embedder_model, sense_invent, senses_vocabulary)
-    test_set = WSDDataset(evaluation_corpus, embedder_model, sense_invent, senses_vocabulary)
+    torch.save(train_set, const.PREPROCESSED_TRAIN_PATH)
 
-    torch.save(train_set, const.PREPROCESSED_GLOSSBERT_TRAIN_PATH)
-    torch.save(valid_set, const.PREPROCESSED_GLOSSBERT_VALID_PATH)
-    torch.save(test_set, const.PREPROCESSED_GLOSSBERT_TEST_PATH)
+    valid_set = WSDDataset(semeval07_corpus, embedder_model, sense_invent, senses_vocabulary)
+    torch.save(valid_set, const.PREPROCESSED_VALID_PATH)
+
+    wic_test_set = WSDDataset(wic_corpus_dev, embedder_model, sense_invent, senses_vocabulary)
+    torch.save(wic_test_set, const.PREPROCESSED_TEST_PATH)
 
     ### GlossBERT datasets
     
@@ -256,9 +256,10 @@ if __name__ == "__main__":
     SemCor_fraction = random.sample(training_corpus, int(len(training_corpus) * SemCor_fraction_size))
 
     train_set = GlossBERTDataset.from_tokens(SemCor_fraction + wic_corpus_train, sense_invent)
-    valid_set = GlossBERTDataset.from_tokens(semeval07_corpus, sense_invent)
-    test_set = GlossBERTDataset.from_tokens(wic_corpus_dev, sense_invent)
-
     train_set.save_as_json(f"../../data/preprocessed/SemCor{int(SemCor_fraction_size * 100)}+wic_train.json")
+
+    valid_set = GlossBERTDataset.from_tokens(semeval07_corpus, sense_invent)    
     valid_set.save_as_json(const.PREPROCESSED_GLOSSBERT_VALID_PATH)
+
+    test_set = GlossBERTDataset.from_tokens(wic_corpus_dev, sense_invent)
     test_set.save_as_json(const.PREPROCESSED_GLOSSBERT_TEST_PATH)
