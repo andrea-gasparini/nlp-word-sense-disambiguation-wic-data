@@ -90,7 +90,7 @@ class WSDDataset(Dataset):
             # shape: (batch_size=1, sample_length, embedding_dimension)
             embeddings: Tensor = self.embedder([[token.text for token in sample]], device=utils.get_device())
             # remove the empty batch size dimension
-            embeddings: Tensor = embeddings.squeeze()
+            embeddings: Tensor = embeddings.squeeze(dim=-1)
 
             for token, embedding in zip(sample, embeddings):
                 if token.is_tagged:
@@ -150,7 +150,17 @@ class GlossBERTDataset(Dataset):
                 })
             return cls(encoded_samples)
 
-    def save_as_json(self, path: str) -> None:
+    @classmethod
+    def parse(cls, samples_or_path: Union[List[Sample], str]) -> "GlossBERTDataset":
+
+        if isinstance(samples_or_path, str):
+            return cls.from_json(samples_or_path)
+        elif isinstance(samples_or_path, List):
+            return cls(samples_or_path)
+        else:
+            raise Exception(f"`samples_or_path` type: {type(samples_or_path)} is not valid")
+
+    def save_as_json(self, path: str, indent: Optional[int] = None) -> None:
         json_samples = list()
 
         for sample in self:
@@ -162,7 +172,7 @@ class GlossBERTDataset(Dataset):
             })
 
         with open(path, "w+") as f:
-            json.dump(json_samples, f)
+            json.dump(json_samples, f, indent=indent)
 
     def __getitem__(self, index: int) -> Sample:
         return self.samples[index]
@@ -252,11 +262,11 @@ if __name__ == "__main__":
         wic_corpus_train.append(wic_sample.sentence1)
         wic_corpus_train.append(wic_sample.sentence2)
 
-    SemCor_fraction_size = 0.1
+    SemCor_fraction_size = 0.15
     SemCor_fraction = random.sample(training_corpus, int(len(training_corpus) * SemCor_fraction_size))
 
-    train_set = GlossBERTDataset.from_tokens(SemCor_fraction + wic_corpus_train, sense_invent)
-    train_set.save_as_json(f"../../data/preprocessed/SemCor{int(SemCor_fraction_size * 100)}+wic_train.json")
+    train_set = GlossBERTDataset.from_tokens(SemCor_fraction, sense_invent)
+    train_set.save_as_json(f"../../data/preprocessed/SemCor{int(SemCor_fraction_size * 100)}.json")
 
     valid_set = GlossBERTDataset.from_tokens(semeval07_corpus, sense_invent)    
     valid_set.save_as_json(const.PREPROCESSED_GLOSSBERT_VALID_PATH)

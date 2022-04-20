@@ -22,8 +22,7 @@ class WordSenseDisambiguator(pl.LightningModule):
         self.save_hyperparameters(hparams)
         self.senses_vocab = senses_vocab
 
-        self.model = nn.Sequential(nn.BatchNorm1d(self.hparams.input_size),
-                                   nn.Dropout(0.2),
+        self.model = nn.Sequential(nn.Dropout(0.2),
                                    nn.Linear(self.hparams.input_size, self.hparams.hidden_size),
                                    nn.Dropout(0.2),
                                    nn.ReLU(),
@@ -124,7 +123,7 @@ class GlossBERT(pl.LightningModule):
         # new shape: (batch_size, embedding_dimension)
         bert_embeddings = bert_embeddings[:, 0]
 
-        logits = self.classification_head(bert_embeddings).squeeze()
+        logits = self.classification_head(bert_embeddings).squeeze(dim=-1)
 
         return {
             "logits": logits,
