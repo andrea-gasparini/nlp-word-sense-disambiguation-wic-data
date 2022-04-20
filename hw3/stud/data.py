@@ -10,7 +10,9 @@ from pytorch_lightning.utilities import AttributeDict
 class HParams:
     num_classes: int
     input_size: int
+    batch_size: int
     hidden_size: int = 100
+    dropout: float = 0.2
     learning_rate: float = 1e-3
 
     def as_dict(self) -> AttributeDict:

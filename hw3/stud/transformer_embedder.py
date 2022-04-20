@@ -9,6 +9,13 @@ from stud import utils
 
 
 class TransformerEmbedder(pl.LightningModule):
+    """
+    A wrapper class for Transformer based encoder models (e.g. BERT).
+    It takes a pretrained Hugging Face model name (or a path to its local dump) and can be either fine-tuned or not.
+
+    Given a batch of tokenized sentences, it returns the hidden states of the last layer,
+    averaging eventual WordPiece sub-words representations into one.
+    """
 
     def __init__(self, pretrained_model_name_or_path: str, fine_tune: bool = False) -> None:
         super().__init__()

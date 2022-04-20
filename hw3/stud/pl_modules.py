@@ -15,6 +15,11 @@ StepOutput = Dict[str, Tensor]
 
 
 class WordSenseDisambiguator(pl.LightningModule):
+    """
+    Model for the token level classification approach to WSD.
+    It expects pre-computed contextualized embeddings as input,
+    applies a simple linear model and predicts sense ids among WordNet's candidates.
+    """
 
     def __init__(self, hparams: Dict, senses_vocab: Vocab, ignore_loss_index: int = -100) -> None:
         super().__init__()
@@ -100,6 +105,10 @@ class WordSenseDisambiguator(pl.LightningModule):
 
 
 class GlossBERT(pl.LightningModule):
+    """
+    Model for fine-tuning BERT with the context-gloss pairs binary classification task,
+    following: `GlossBERT: BERT for word sense disambiguation with gloss knowledge. <https://aclanthology.org/D19-1355>`
+    """
 
     def __init__(self, hparams: Dict, bert_model_name_or_path: str) -> None:
         super().__init__()

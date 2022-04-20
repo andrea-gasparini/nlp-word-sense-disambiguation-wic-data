@@ -10,6 +10,15 @@ from stud.data import Token, Pos, WiCSample
 
 
 def read_wsd_gold_keys(txt_path: str) -> Dict[str, str]:
+    """
+    Reads the gold keys of a WSD corpus from a txt file
+    and parses it into a dictionary that goes from tokens ids to wordnet sense ids.
+
+    Args:
+        txt_path: gold keys file
+
+    Returns: tokens ids to wordnet sense ids dictionary
+    """
     if not os.path.isfile(txt_path):
         raise Exception(f"{txt_path} is not a valid txt gold keys file")
 
@@ -26,6 +35,15 @@ def read_wsd_gold_keys(txt_path: str) -> Dict[str, str]:
 
 
 def read_wsd_corpus(xml_data_path: str, txt_gold_keys_path: str) -> List[List[Token]]:
+    """
+    Parses a WSD corpus from reading an xml data file and a txt gold keys file.
+
+    Args:
+        xml_data_path: WSD data file
+        txt_gold_keys_path: WSD gold keys file
+
+    Returns: a list of parsed sentences (list of `Token`)
+    """
     if not os.path.isfile(xml_data_path):
         raise Exception(f"{xml_data_path} is not a valid xml data file")
 
@@ -60,6 +78,15 @@ def read_wsd_corpus(xml_data_path: str, txt_gold_keys_path: str) -> List[List[To
 
 
 def read_wic_corpus(jsonl_data_path: str, wsd_txt_gold_keys_path: Optional[str] = None) -> List[WiCSample]:
+    """
+    Parses a WiC corpus from reading a jsonl data file and, optionally, a txt file for WSD gold keys.
+
+    Args:
+        jsonl_data_path: WiC data file
+        wsd_txt_gold_keys_path: optional WSD gold keys file
+
+    Returns: a list of parsed `WiCSample`
+    """
     if not os.path.isfile(jsonl_data_path):
         raise Exception(f"{jsonl_data_path} is not a valid jsonl data file")
 

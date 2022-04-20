@@ -22,6 +22,10 @@ Batch = Dict[str, Union[Tensor, List[Token], List[List[str]]]]
 
 
 class WSDDataset(Dataset):
+    """
+    Dataset for the token level classification approach to WSD.
+    Contextualized embeddings are pre-computed for each sample.
+    """
 
     def __init__(self,
                  samples: List[List[Token]],
@@ -99,6 +103,7 @@ class WSDDataset(Dataset):
                     possible_sense_ids = sense_inventory.get_possible_sense_ids(token)
 
                     self.encoded_samples.append({
+                        # store the embedding of the target word's hidden state
                         "sense_embedding": embedding,
                         "sense_index": torch.tensor(self.senses_vocab[token.sense_id]),
                         "candidates": possible_sense_ids,
@@ -125,6 +130,10 @@ class WSDDataset(Dataset):
 
 
 class GlossBERTDataset(Dataset):
+    """
+    Dataset for fine-tuning BERT with the context-gloss pairs binary classification task,
+    following: `GlossBERT: BERT for word sense disambiguation with gloss knowledge. <https://aclanthology.org/D19-1355>`
+    """
 
     def __init__(self, samples: List[Sample]) -> None:
         super().__init__()
@@ -194,7 +203,8 @@ class GlossBERTDataset(Dataset):
             sample = samples[sample_idx]
 
             for token in sample:
-                if token.id is not None:
+                if token.is_tagged:
+                    # retrieve all possible sense ids and generate context-gloss pairs
                     for sense_id in sense_inventory.get_possible_sense_ids(token):
                         context = [token.text for token in sample]
                         gloss = sense_inventory.get_gloss(sense_id)
