@@ -10,4 +10,4 @@ pytorch_lightning==1.6.3
 transformers==4.19.2
 jsonlines==2.0.0
 nltk==3.6.1
-wandb==0.12.16
+wandb==0.12.17
