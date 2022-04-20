@@ -26,6 +26,7 @@ class WSDDataModule(pl.LightningDataModule):
             train_samples_or_path: either a list of training samples or a path to an already preprocessed dump
             valid_samples_or_path: either a list of validation samples or a path to an already preprocessed dump
             test_samples_or_path: either a list of test samples or a path to an already preprocessed dump
+            senses_vocab: a SenseInventory instance
             senses_vocab: the mapping vocabulary from sense keys to numeric indices
             batch_size: how many samples per batch to load
             num_workers: how many subprocesses to use for data loading

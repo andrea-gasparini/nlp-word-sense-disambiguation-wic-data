@@ -35,8 +35,6 @@ class WordSenseDisambiguator(pl.LightningModule):
         self.train_f1 = F1Score(average="macro", num_classes=self.hparams.num_classes)
         self.valid_acc = Accuracy()
         self.valid_f1 = F1Score(average="macro", num_classes=self.hparams.num_classes)
-        self.test_acc = Accuracy()
-        self.test_f1 = F1Score(average="macro", num_classes=self.hparams.num_classes)
 
     def forward(self, batch: Batch) -> StepOutput:
         logits = self.model(batch["sense_embeddings"])

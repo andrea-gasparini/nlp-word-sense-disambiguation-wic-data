@@ -119,7 +119,7 @@ class WSDDataset(Dataset):
         return {
             "sense_embeddings": torch.stack(dict_batch["sense_embedding"]),
             "sense_indices": torch.stack(dict_batch["sense_index"]),
-            "condidates": dict_batch["condidates"],
+            "candidates": dict_batch["candidates"],
             "tokens": dict_batch["token"]
         }
 
