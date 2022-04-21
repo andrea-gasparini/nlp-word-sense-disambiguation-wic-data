@@ -1,8 +1,7 @@
 import json
-from abc import ABC as ABSTRACT_CLASS, abstractmethod
 from collections import Counter
 from functools import lru_cache
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 
 from nltk import TreebankWordTokenizer
 from nltk.corpus import wordnet
@@ -44,18 +43,18 @@ class SenseInventory:
         with open(sense_ids_dict_path) as file:
             self.lemma_pos_to_sense_ids: Dict[str, Dict[str, List[str]]] = json.load(file)
 
-    def get_possible_sense_ids(self, token: Token) -> List[str]:
+    def get_possible_sense_ids(self, lemma: str, pos: Optional[Pos] = None) -> List[str]:
         """
         Returns all possible sense ids matching lemma and part of speech tag (any if pos is None) of the given token
         """
-        if token.lemma in self.lemma_pos_to_sense_ids:
-            if token.pos is None:
-                return flatten(list(self.lemma_pos_to_sense_ids[token.lemma].values()))
+        if lemma in self.lemma_pos_to_sense_ids:
+            if pos is None:
+                return flatten(list(self.lemma_pos_to_sense_ids[lemma].values()))
             else:
-                return self.lemma_pos_to_sense_ids[token.lemma][str(token.pos)]
+                return self.lemma_pos_to_sense_ids[lemma][str(pos)]
         else:
             # retrieve sense ids from wordnet API
-            return self.get_wn_possible_sense_ids(token.lemma, token.wn_pos)
+            return self.get_wn_possible_sense_ids(lemma, pos.to_wordnet() if pos is not None else None)
 
     def get_gloss(self, sense_id: str) -> List[str]:
         """
@@ -81,7 +80,7 @@ class SenseInventory:
         counter = Counter()
 
         for lemma in self.lemma_pos_to_sense_ids.keys():
-            for sense_id in flatten(self.lemma_pos_to_sense_ids[lemma].values()):
+            for sense_id in flatten(list(self.lemma_pos_to_sense_ids[lemma].values())):
                 counter[sense_id] += 1
 
         vocabulary = vocab(counter, min_freq=1, specials=[UNK_TOKEN])
@@ -91,7 +90,7 @@ class SenseInventory:
 
     @staticmethod
     @lru_cache(maxsize=None)
-    def get_wn_possible_sense_ids(lemma: str, pos: str) -> List[str]:
+    def get_wn_possible_sense_ids(lemma: str, pos: Optional[str] = None) -> List[str]:
         lemmas: List[Lemma] = wordnet.lemmas(lemma, pos) if lemma else list()
 
         synsets = set()

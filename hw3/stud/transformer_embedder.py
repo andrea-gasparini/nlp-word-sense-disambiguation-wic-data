@@ -39,10 +39,10 @@ class TransformerEmbedder(pl.LightningModule):
                                   is_split_into_words=True)
 
         self.model.to(self.device if device is None else device)
-        input_ids = encoding["input_ids"].to(self.device if device is None else device)
+        encoder_in = {k: v.to(self.device if device is None else device) for k, v in encoding.items()}
 
         # shape: (batch_size, num_sub-words, embedding_size)
-        encoder_outputs = self.model(input_ids)
+        encoder_outputs = self.model(**encoder_in)
 
         # layer pooling: last
         pooled_output = encoder_outputs.last_hidden_state

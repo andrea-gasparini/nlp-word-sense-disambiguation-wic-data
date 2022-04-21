@@ -100,7 +100,7 @@ class WSDDataset(Dataset):
                 if token.is_tagged:
 
                     # retrieve the possible sense ids of the given token
-                    possible_sense_ids = sense_inventory.get_possible_sense_ids(token)
+                    possible_sense_ids = sense_inventory.get_possible_sense_ids(token.lemma, token.pos)
 
                     self.encoded_samples.append({
                         # store the embedding of the target word's hidden state
@@ -205,7 +205,7 @@ class GlossBERTDataset(Dataset):
             for token in sample:
                 if token.is_tagged:
                     # retrieve all possible sense ids and generate context-gloss pairs
-                    for sense_id in sense_inventory.get_possible_sense_ids(token):
+                    for sense_id in sense_inventory.get_possible_sense_ids(token.lemma):
                         context = [token.text for token in sample]
                         gloss = sense_inventory.get_gloss(sense_id)
                         context_gloss = context + [TRANSFORMER_EMBEDDER_SEP_TOKEN] + gloss
