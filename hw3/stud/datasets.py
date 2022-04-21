@@ -143,8 +143,9 @@ class GlossBERTDataset(Dataset):
     def from_tokens(cls,
                     samples: List[List[Token]],
                     sense_inventory: SenseInventory,
-                    senses_vocab: Optional[Vocab] = None) -> "GlossBERTDataset":
-        return cls(cls.preprocess(samples, sense_inventory, senses_vocab))
+                    senses_vocab: Optional[Vocab] = None,
+                    ignore_pos: bool = False) -> "GlossBERTDataset":
+        return cls(cls.preprocess(samples, sense_inventory, senses_vocab, ignore_pos))
 
     @classmethod
     def from_json(cls, path: str) -> "GlossBERTDataset":
@@ -175,7 +176,7 @@ class GlossBERTDataset(Dataset):
         for sample in self:
             json_samples.append({
                 "context-gloss": sample["context-gloss"],
-                "label": sample["label"].item(),
+                "label": sample["label"].item() if "label" in sample else None,
                 "sense_index": sample["sense_index"].item(),
                 "token": sample["token"].as_dict()
             })
@@ -192,7 +193,8 @@ class GlossBERTDataset(Dataset):
     @staticmethod
     def preprocess(samples: List[List[Token]],
                    sense_inventory: SenseInventory,
-                   senses_vocab: Optional[Vocab] = None) -> List[Sample]:
+                   senses_vocab: Optional[Vocab] = None,
+                   ignore_pos: bool = False) -> List[Sample]:
 
         if senses_vocab is None:
             senses_vocab = sense_inventory.build_senses_vocab()
@@ -203,22 +205,24 @@ class GlossBERTDataset(Dataset):
             sample = samples[sample_idx]
 
             for token in sample:
-                if token.is_tagged:
+                if token.id is not None:
                     # retrieve all possible sense ids and generate context-gloss pairs
-                    for sense_id in sense_inventory.get_possible_sense_ids(token.lemma):
+                    ids = sense_inventory.get_possible_sense_ids(token.lemma, token.pos if not ignore_pos else None)
+                    for sense_id in ids:
                         context = [token.text for token in sample]
                         gloss = sense_inventory.get_gloss(sense_id)
                         context_gloss = context + [TRANSFORMER_EMBEDDER_SEP_TOKEN] + gloss
 
-                        # label is True when the context+gloss pair represents the target word's sense, False otherwise
-                        label = 1 if sense_id == token.sense_id else 0
-
                         encoded_samples.append({
                             "context-gloss": context_gloss,
-                            "label": torch.tensor(label),
                             "sense_index": torch.tensor(senses_vocab[sense_id]),
                             "token": token
                         })
+
+                        if token.sense_id is not None:
+                            # True when the context+gloss pair represents the target word's sense, False otherwise
+                            label = 1 if sense_id == token.sense_id else 0
+                            encoded_samples[-1]["label"] = torch.tensor(label)
 
         return encoded_samples
 
@@ -229,7 +233,7 @@ class GlossBERTDataset(Dataset):
 
         return {
             "context-gloss": dict_batch["context-gloss"],
-            "labels": torch.stack(dict_batch["label"]),
+            "labels": torch.stack(dict_batch["label"]) if "label" in dict_batch else None,
             "sense_indices": torch.stack(dict_batch["sense_index"]),
             "tokens": dict_batch["token"]
         }

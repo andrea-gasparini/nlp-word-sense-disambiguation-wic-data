@@ -12,6 +12,7 @@ class HParams:
     input_size: int
     batch_size: int
     hidden_size: int = 100
+    ignore_pos: bool = False
     dropout: float = 0.2
     learning_rate: float = 1e-3
 

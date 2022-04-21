@@ -2,18 +2,17 @@
 
 __pycache__
 
+logs/*
 wandb/
 lightning_logs/
 
 data/WSD_Evaluation_Framework/
-data/xl-wsd/
-data/preprocessed/GlossBERT/*
+data/preprocessed/GlossBERT/SemCor*.json
 data/preprocessed/WSDisambiguator/*
 
 model/bert-base-cased/
 model/*.ckpt
+model/glosses/
+model/lemma_pos_dictionary.json
 
 !.gitkeep
-
-!data/preprocessed/GlossBERT/semeval2007.json
-!data/preprocessed/GlossBERT/wic_dev.json

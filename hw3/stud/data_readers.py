@@ -92,39 +92,52 @@ def read_wic_corpus(jsonl_data_path: str, wsd_txt_gold_keys_path: Optional[str] 
 
     sense_ids_dict = read_wsd_gold_keys(wsd_txt_gold_keys_path) if wsd_txt_gold_keys_path is not None else None
 
-    samples = list()
+    with jsonlines.open(jsonl_data_path) as f:
+        return parse_wic_samples(f, sense_ids_dict)
 
+
+def parse_wic_samples(sentence_pairs: List[Dict], sense_ids_dict: Optional[Dict] = None) -> List[WiCSample]:
+    """
+    Parses a list of raw WiC sentence pairs samples, optionally assigning WSD gold keys if a sense ids dict is given.
+
+    Args:
+        sentence_pairs: list of WiC sentence pairs samples
+        sense_ids_dict: optional WSD gold keys dictionary (from token ids to sense ids)
+
+    Returns: a list of parsed `WiCSample`
+    """
+
+    samples = list()
     tokenizer = TreebankWordTokenizer()
 
-    with jsonlines.open(jsonl_data_path) as f:
-        for raw_sample in f:
-            raw_sample: Dict = defaultdict(lambda: None, raw_sample)
-            encoded_sentences = (list(), list())
+    for raw_sample in sentence_pairs:
+        raw_sample: Dict = defaultdict(lambda: None, raw_sample)
+        encoded_sentences = (list(), list())
 
-            # iterate over sentence numbers (i.e. sentence1 and sentence2)
-            for sentence_n in [1, 2]:
+        # iterate over sentence numbers (i.e. sentence1 and sentence2)
+        for sentence_n in [1, 2]:
 
-                sentence = raw_sample[f"sentence{sentence_n}"]
-                tokenized_sentence = tokenizer.tokenize(sentence)
-                target_start_index = int(raw_sample[f"start{sentence_n}"])
-                target_previous_tokens = len(tokenizer.tokenize(sentence[:target_start_index]))
+            sentence = raw_sample[f"sentence{sentence_n}"]
+            tokenized_sentence = tokenizer.tokenize(sentence)
+            target_start_index = int(raw_sample[f"start{sentence_n}"])
+            target_previous_tokens = len(tokenizer.tokenize(sentence[:target_start_index]))
 
-                for token_index in range(len(tokenized_sentence)):
-                    token = Token(text=tokenized_sentence[token_index].lower(), index=token_index)
+            for token_index in range(len(tokenized_sentence)):
+                token = Token(text=tokenized_sentence[token_index].lower(), index=token_index)
 
-                    if token_index == target_previous_tokens:
-                        token.lemma = raw_sample["lemma"]
-                        token.pos = Pos.parse(raw_sample["pos"])
-                        token.id = f"{raw_sample['id']}.s{sentence_n}"
+                if token_index == target_previous_tokens:
+                    token.lemma = raw_sample["lemma"]
+                    token.pos = Pos.parse(raw_sample["pos"])
+                    token.id = f"{raw_sample['id']}.s{sentence_n}"
 
-                        if sense_ids_dict is not None:
-                            token.sense_id = sense_ids_dict[token.id]
+                    if sense_ids_dict is not None:
+                        token.sense_id = sense_ids_dict[token.id]
 
-                    encoded_sentences[sentence_n - 1].append(token)
+                encoded_sentences[sentence_n - 1].append(token)
 
-            sample = WiCSample(sentence1=encoded_sentences[0],
-                               sentence2=encoded_sentences[1],
-                               label=bool(raw_sample["label"]))
-            samples.append(sample)
+        sample = WiCSample(sentence1=encoded_sentences[0],
+                           sentence2=encoded_sentences[1],
+                           label=bool(raw_sample["label"]))
+        samples.append(sample)
 
     return samples
