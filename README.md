@@ -1,9 +1,13 @@
-# WSD of Word-in-Context disambiguation data
+# WSD for Word-in-Context disambiguation
 
 In this project we make use of Word Sense Disambiguation ([Navigli, 2009](https://doi.org/10.1145/1459352.1459355)) to tackle the Word-in-Context (WiC) disambiguation task, proposing two BERT-based models.
 A first one with a feature-based approach and a second one with a fine-tuning approach, in which we re-implement GlossBERT ([Huang et al., 2019](https://aclanthology.org/D19-1355)).
 
 For further information, you can read the detailed [report](report.pdf) or take a look at the [presentation slides](presentation.pdf) (pages 19-24).
+
+## Checkpoints
+
+- [GlossBERT 15% SemCor](https://drive.google.com/file/d/11zHM8UAFzBQhXfSQV_QKeDrNOpflRzGf/view?usp=sharing) (WSD: 60,10 | WiC: 68,04)
 
 ## Authors
 
