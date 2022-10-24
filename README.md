@@ -5,6 +5,8 @@ A first one with a feature-based approach and a second one with a fine-tuning ap
 
 For further information, you can read the detailed [report](report.pdf) or take a look at the [presentation slides](presentation.pdf) (pages 19-24).
 
+This project has been developed during the A.Y. 2020-2021 for the [Natural Language Processing](http://naviglinlp.blogspot.com/2021/) course @ Sapienza University of Rome.
+
 ## Checkpoints
 
 - [GlossBERT 15% SemCor](https://drive.google.com/file/d/11zHM8UAFzBQhXfSQV_QKeDrNOpflRzGf/view?usp=sharing) (WSD: 60,10 | WiC: 68,04)
