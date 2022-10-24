@@ -1,3 +1,16 @@
+# Word Sense Disambiguation (WSD) of Word-in-Context (WiC) data
+
+In this project we make use of Word Sense Disambiguation ([Navigli, 2009](https://doi.org/10.1145/1459352.1459355)) to tackle the Word-in-Context (WiC) disambiguation task, proposing two BERT-based models.
+A first one with a feature-based approach and a second one with a fine-tuning approach, in which we re-implement GlossBERT ([Huang et al., 2019](https://aclanthology.org/D19-1355)).
+
+For further information, you can read the detailed [report](report.pdf) or take a look at the [presentation slides](presentation.pdf) (pages 19-24).
+
+## Authors
+
+- [Andrea Gasparini](https://github.com/andrea-gasparini)
+
+<!--
+
 # NLP-2021: Third Homework
 This is the third homework of the NLP 2021 course at Sapienza University of Rome.
 
@@ -79,3 +92,5 @@ bash test.sh data/dev.jsonl data/dev_wsd.txt
 
 If you hadn't changed *hw3/stud/model.py* yet when you run test.sh, the scores you just saw describe how a random baseline
 behaves. To have *test.sh* evaluate your model, follow the instructions in the slide.
+
+-->
