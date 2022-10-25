@@ -11,6 +11,11 @@ This project has been developed during the A.Y. 2020-2021 for the [Natural Langu
 
 - [GlossBERT 15% SemCor](https://drive.google.com/file/d/11zHM8UAFzBQhXfSQV_QKeDrNOpflRzGf/view?usp=sharing) (WSD: 60,10 | WiC: 68,04)
 
+## Related projects
+
+- [Word-in-Context disambiguation](https://github.com/andrea-gasparini/nlp-word-in-context-disambiguation) experimenting with a word-level approach (MLP + ReLU) and a sequence encoding one (LSTMs), on top of GloVe embeddings
+- [Aspect-Based Sentiment Analysis (ABSA)](https://github.com/andrea-gasparini/nlp-aspect-based-sentiment-analysis) using different setups based on 2 stacked BiLSTMs and Attention layers; leveraging PoS, GloVe and BERT (frozen) embeddings
+
 ## Authors
 
 - [Andrea Gasparini](https://github.com/andrea-gasparini)
