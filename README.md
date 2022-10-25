@@ -13,7 +13,7 @@ This project has been developed during the A.Y. 2020-2021 for the [Natural Langu
 
 ## Related projects
 
-- [Word-in-Context disambiguation](https://github.com/andrea-gasparini/nlp-word-in-context-disambiguation) experimenting with a word-level approach (MLP + ReLU) and a sequence encoding one (LSTMs), on top of GloVe embeddings
+- [Word-in-Context disambiguation](https://github.com/andrea-gasparini/nlp-word-in-context-disambiguation) as a binary classification task, experimenting with a word-level approach (MLP + ReLU) and a sequence encoding one (LSTMs), on top of GloVe embeddings
 - [Aspect-Based Sentiment Analysis (ABSA)](https://github.com/andrea-gasparini/nlp-aspect-based-sentiment-analysis) using different setups based on 2 stacked BiLSTMs and Attention layers; leveraging PoS, GloVe and BERT (frozen) embeddings
 
 ## Authors
